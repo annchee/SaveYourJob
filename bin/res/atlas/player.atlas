@@ -1,0 +1,1 @@
+{"frames":{"player_1.png":{"frame":{"h":285,"idx":0,"w":209,"x":0,"y":0},"sourceSize":{"h":285,"w":209},"spriteSourceSize":{"x":0,"y":0}},"player_2.png":{"frame":{"h":285,"idx":0,"w":209,"x":210,"y":0},"sourceSize":{"h":285,"w":209},"spriteSourceSize":{"x":0,"y":0}}},"meta":{"image":"player.png","prefix":"player/"}}
