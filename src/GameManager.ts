@@ -545,7 +545,6 @@ export default class GameManager extends Laya.Script {
 
     onHideLetter(iLetter:Laya.Text): void
     {
-        console.log(iLetter);
         Laya.Tween.to(iLetter,{alpha:0},200,Laya.Ease.bounceIn,Laya.Handler.create(this,this.onHideLetterComplete,null,true));
     }
 

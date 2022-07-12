@@ -379,7 +379,6 @@
             this.playerOutput.visible = false;
         }
         onHideLetter(iLetter) {
-            console.log(iLetter);
             Laya.Tween.to(iLetter, { alpha: 0 }, 200, Laya.Ease.bounceIn, Laya.Handler.create(this, this.onHideLetterComplete, null, true));
         }
         onHideLetterComplete() {

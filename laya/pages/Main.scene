@@ -2,7 +2,7 @@
     "x":0,
     "type":"Scene",
     "selectedBox":2,
-    "selecteID":3,
+    "selecteID":43,
     "searchKey":"Scene",
     "props":{"width":1066,"sceneColor":"#000000","height":600},
     "nodeParent":-1,
@@ -577,6 +577,21 @@
         },
         {
             "x":15,
+            "type":"Text",
+            "searchKey":"Text,action_countdown",
+            "props":{"y":300,"x":533,"width":687,"visible":false,"valign":"middle","scaleY":1,"scaleX":1,"pivotY":211,"pivotX":344,"name":"action_countdown","height":421,"fontSize":100,"font":"Microsoft YaHei","color":"#000000","cacheAs":"bitmap","align":"center"},
+            "nodeParent":2,
+            "label":"action_countdown",
+            "isDirectory":false,
+            "isAniNode":true,
+            "hasChild":false,
+            "compId":43,
+            "child":[
+                ],
+            "$HIDDEN":false
+        },
+        {
+            "x":15,
             "type":"Script",
             "switchAble":true,
             "source":"src/GameManager.ts",
@@ -589,21 +604,6 @@
             "isAniNode":true,
             "hasChild":false,
             "compId":42,
-            "child":[
-                ],
-            "$HIDDEN":false
-        },
-        {
-            "x":15,
-            "type":"Text",
-            "searchKey":"Text,action_countdown",
-            "props":{"y":300,"x":533,"width":687,"visible":false,"valign":"middle","scaleY":1,"scaleX":1,"pivotY":211,"pivotX":344,"name":"action_countdown","height":421,"fontSize":100,"font":"Microsoft YaHei","color":"#000000","align":"center"},
-            "nodeParent":2,
-            "label":"action_countdown",
-            "isDirectory":false,
-            "isAniNode":true,
-            "hasChild":false,
-            "compId":43,
             "child":[
                 ],
             "$HIDDEN":false
