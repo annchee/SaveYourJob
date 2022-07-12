@@ -1,6 +1,47 @@
 (function () {
     'use strict';
 
+    class Loading extends Laya.Script {
+        constructor() {
+            super();
+            this.progressBar = null;
+        }
+        onStart() {
+            this.progressBarWidth = this.progressBar.width;
+            this.progressBar.width = 0;
+            var resourceArray = [
+                { url: "main/bg.png", type: Laya.Loader.IMAGE },
+                { url: "res/atlas/symbol.atlas", type: Laya.Loader.ATLAS },
+                { url: "main/end_bg.png", type: Laya.Loader.IMAGE },
+                { url: "res/atlas/player.atlas", type: Laya.Loader.ATLAS },
+                { url: "res/atlas/main.atlas", type: Laya.Loader.ATLAS },
+                { url: "res/sound/bg.mp3", type: Laya.Loader.SOUND },
+                { url: "res/sound/bg_intro.mp3", type: Laya.Loader.SOUND },
+                { url: "res/sound/bg_game_over.mp3", type: Laya.Loader.SOUND },
+                { url: "res/sound/bg_lose.mp3", type: Laya.Loader.SOUND },
+                { url: "res/sound/countdown_123.mp3", type: Laya.Loader.SOUND },
+                { url: "res/sound/countdown_start.mp3", type: Laya.Loader.SOUND },
+                { url: "res/sound/press_but.mp3", type: Laya.Loader.SOUND },
+                { url: "res/sound/win.mp3", type: Laya.Loader.SOUND },
+                { url: "res/sound/lose.mp3", type: Laya.Loader.SOUND }
+            ];
+            Laya.loader.load(resourceArray, Laya.Handler.create(this, this.onLoaded), Laya.Handler.create(this, this.onProgress, null, false));
+        }
+        onLoaded() {
+            this.progressBar.width = this.progressBarWidth;
+        }
+        onProgress(value) {
+            var percentProgressBar = this.progressBarWidth * value;
+            this.progressBar.width = percentProgressBar;
+            if (value == 1) {
+                Laya.Scene.open('Main.scene', true, 0, Laya.Handler.create(this, () => {
+                    Laya.Scene.destroy("Loading.scene");
+                }));
+                return;
+            }
+        }
+    }
+
     var keyBestScore = "keyBestScore";
     class GameManager extends Laya.Script {
         constructor() {
@@ -27,40 +68,17 @@
             this.guessOutput = null;
             this.playerOutput = null;
             this.countDownValue = null;
-            this.angryBox = null;
-            this.angryHpValue = null;
             this.scoreText = null;
             this.score = null;
             this.bestScore = null;
             this.currentScore = null;
             this.letterPlus = null;
             this.letterMinus = null;
+            this.letterGood = null;
             Laya.SoundManager.setMusicVolume(0.5);
             this.playMusic(this.currentMusic);
         }
-        onAwake() {
-            var resourceArray = [
-                { url: "main/bg.png", type: Laya.Loader.IMAGE },
-                { url: "res/atlas/symbol.atlas", type: Laya.Loader.ATLAS },
-                { url: "main/end_bg.png", type: Laya.Loader.IMAGE },
-                { url: "res/atlas/player.atlas", type: Laya.Loader.ATLAS },
-                { url: "res/atlas/main.atlas", type: Laya.Loader.ATLAS },
-                { url: "res/sound/bg.mp3", type: Laya.Loader.SOUND },
-                { url: "res/sound/bg_intro.mp3", type: Laya.Loader.SOUND },
-                { url: "res/sound/bg_game_over.mp3", type: Laya.Loader.SOUND },
-                { url: "res/sound/bg_lose.mp3", type: Laya.Loader.SOUND },
-                { url: "res/sound/countdown_123.mp3", type: Laya.Loader.SOUND },
-                { url: "res/sound/countdown_start.mp3", type: Laya.Loader.SOUND },
-                { url: "res/sound/press_but.mp3", type: Laya.Loader.SOUND },
-                { url: "res/sound/win.mp3", type: Laya.Loader.SOUND },
-                { url: "res/sound/lose.mp3", type: Laya.Loader.SOUND }
-            ];
-            Laya.loader.load(resourceArray, Laya.Handler.create(this, this.onLoad));
-        }
-        onLoad() {
-            Laya.timer.once(1000, this, this.startGame);
-        }
-        startGame() {
+        onStart() {
             this.audioBtn.on(Laya.Event.MOUSE_UP, this, this.onAudio);
             this.startBtn.once(Laya.Event.CLICK, this, this.onHideInfo);
         }
@@ -71,7 +89,6 @@
             this.gameInfo.visible = false;
             this.guessOutput.visible = false;
             this.playerOutput.visible = false;
-            this.angryBox.visible = false;
             this.scoreText.visible = false;
             this.score.visible = false;
             this.countDownValue.visible = false;
@@ -110,15 +127,11 @@
             this.boss.skin = "main/boss1.png";
             this.bossLose = 1;
             this.numHp = 0;
-            this.angryBox.visible = true;
-            this.angryHpValue.value = "" + this.numHp;
             this.numScore = 0;
             this.scoreText.visible = true;
             this.score.visible = true;
             this.score.value = "000";
-            this.rockBtn.visible = false;
-            this.scissorBtn.visible = false;
-            this.paperBtn.visible = false;
+            this.onDisableAllButton();
             Laya.timer.once(1000, this, this.onPlay);
         }
         onPlay() {
@@ -175,16 +188,16 @@
                     this.countDownValue.value = "2.50";
                 }
                 else if (this.bossLose == 2) {
-                    this.nCountDown = 2.5;
-                    this.countDownValue.value = "2.50";
-                }
-                else if (this.bossLose == 3) {
                     this.nCountDown = 2;
                     this.countDownValue.value = "2.00";
                 }
-                else if (this.bossLose == 4) {
+                else if (this.bossLose == 3) {
                     this.nCountDown = 1.5;
                     this.countDownValue.value = "1.50";
+                }
+                else if (this.bossLose == 4) {
+                    this.nCountDown = 1;
+                    this.countDownValue.value = "1.00";
                 }
             }
             Laya.timer.once(500, this, this.onTimer);
@@ -198,9 +211,7 @@
             Laya.timer.clear(this, this.onTimer);
             Laya.timer.clear(this, this.onCountDown);
             this.countDownValue.visible = false;
-            this.rockBtn.disabled = true;
-            this.scissorBtn.disabled = true;
-            this.paperBtn.disabled = true;
+            this.onDisableAllButton();
             this.player.stop();
             this.playerOutput.visible = true;
             if (this.bossStage == 1 || this.bossStage == 2) {
@@ -210,7 +221,7 @@
                 this.numHp++;
                 this.updateHp();
                 this.playerOutput.skin = "main/rock_wrong.png";
-                Laya.Tween.to(this.letterPlus, { y: 182, scaleX: 1, scaleY: 1 }, 500, Laya.Ease.backOut, Laya.Handler.create(this, this.onHideLetterPlus, null, true));
+                Laya.Tween.to(this.letterPlus, { y: 182, scaleX: 1, scaleY: 1 }, 500, Laya.Ease.backOut, Laya.Handler.create(this, this.onHideLetter, [this.letterPlus], true));
             }
             else if (this.bossStage == 3) {
                 this.playSound("win", 0.8);
@@ -227,7 +238,7 @@
                 }
                 this.numHp--;
                 this.updateHp();
-                Laya.Tween.to(this.letterMinus, { y: 182, scaleX: 1, scaleY: 1 }, 500, Laya.Ease.backOut, Laya.Handler.create(this, this.onHideLetterMinus, null, true));
+                this.onShowLetter();
             }
             this.onCheckCondition();
         }
@@ -236,9 +247,7 @@
             Laya.timer.clear(this, this.onTimer);
             Laya.timer.clear(this, this.onCountDown);
             this.countDownValue.visible = false;
-            this.rockBtn.disabled = true;
-            this.scissorBtn.disabled = true;
-            this.paperBtn.disabled = true;
+            this.onDisableAllButton();
             this.player.stop();
             this.playerOutput.visible = true;
             if (this.bossStage == 2 || this.bossStage == 3) {
@@ -248,7 +257,7 @@
                 this.numHp++;
                 this.updateHp();
                 this.playerOutput.skin = "main/scissor_wrong.png";
-                Laya.Tween.to(this.letterPlus, { y: 182, scaleX: 1, scaleY: 1 }, 500, Laya.Ease.backOut, Laya.Handler.create(this, this.onHideLetterPlus, null, true));
+                Laya.Tween.to(this.letterPlus, { y: 182, scaleX: 1, scaleY: 1 }, 500, Laya.Ease.backOut, Laya.Handler.create(this, this.onHideLetter, [this.letterPlus], true));
             }
             else if (this.bossStage == 1) {
                 this.playSound("win", 0.8);
@@ -265,7 +274,7 @@
                 }
                 this.numHp--;
                 this.updateHp();
-                Laya.Tween.to(this.letterMinus, { y: 182, scaleX: 1, scaleY: 1 }, 500, Laya.Ease.backOut, Laya.Handler.create(this, this.onHideLetterMinus, null, true));
+                this.onShowLetter();
             }
             this.onCheckCondition();
         }
@@ -274,9 +283,7 @@
             Laya.timer.clear(this, this.onTimer);
             Laya.timer.clear(this, this.onCountDown);
             this.countDownValue.visible = false;
-            this.rockBtn.disabled = true;
-            this.scissorBtn.disabled = true;
-            this.paperBtn.disabled = true;
+            this.onDisableAllButton();
             this.player.stop();
             this.playerOutput.visible = true;
             if (this.bossStage == 1 || this.bossStage == 3) {
@@ -286,7 +293,7 @@
                 this.numHp++;
                 this.updateHp();
                 this.playerOutput.skin = "main/paper_wrong.png";
-                Laya.Tween.to(this.letterPlus, { y: 182, scaleX: 1, scaleY: 1 }, 500, Laya.Ease.backOut, Laya.Handler.create(this, this.onHideLetterPlus, null, true));
+                Laya.Tween.to(this.letterPlus, { y: 182, scaleX: 1, scaleY: 1 }, 500, Laya.Ease.backOut, Laya.Handler.create(this, this.onHideLetter, [this.letterPlus], true));
             }
             else if (this.bossStage == 2) {
                 this.playSound("win", 0.8);
@@ -303,7 +310,7 @@
                 }
                 this.numHp--;
                 this.updateHp();
-                Laya.Tween.to(this.letterMinus, { y: 182, scaleX: 1, scaleY: 1 }, 500, Laya.Ease.backOut, Laya.Handler.create(this, this.onHideLetterMinus, null, true));
+                this.onShowLetter();
             }
             this.onCheckCondition();
         }
@@ -359,16 +366,21 @@
             else if (this.numHp >= 4) {
                 this.numHp = 4;
             }
-            this.angryHpValue.value = "" + this.numHp;
+        }
+        onShowLetter() {
+            if (this.bossLose == 1) {
+                Laya.Tween.to(this.letterGood, { y: 182, scaleX: 1, scaleY: 1 }, 500, Laya.Ease.backOut, Laya.Handler.create(this, this.onHideLetter, [this.letterGood], true));
+            }
+            else {
+                Laya.Tween.to(this.letterMinus, { y: 182, scaleX: 1, scaleY: 1 }, 500, Laya.Ease.backOut, Laya.Handler.create(this, this.onHideLetter, [this.letterMinus], true));
+            }
         }
         onHide() {
             this.playerOutput.visible = false;
         }
-        onHideLetterPlus() {
-            Laya.Tween.to(this.letterPlus, { alpha: 0 }, 200, Laya.Ease.bounceIn, Laya.Handler.create(this, this.onHideLetterComplete, null, true));
-        }
-        onHideLetterMinus() {
-            Laya.Tween.to(this.letterMinus, { alpha: 0 }, 200, Laya.Ease.bounceIn, Laya.Handler.create(this, this.onHideLetterComplete, null, true));
+        onHideLetter(iLetter) {
+            console.log(iLetter);
+            Laya.Tween.to(iLetter, { alpha: 0 }, 200, Laya.Ease.bounceIn, Laya.Handler.create(this, this.onHideLetterComplete, null, true));
         }
         onHideLetterComplete() {
             this.letterMinus.scale(0, 0);
@@ -377,6 +389,9 @@
             this.letterPlus.scale(0, 0);
             this.letterPlus.pos(97, 281);
             this.letterPlus.alpha = 1;
+            this.letterGood.scale(0, 0);
+            this.letterGood.pos(96, 282);
+            this.letterGood.alpha = 1;
         }
         onCountDown(iValue) {
             if (this.nCountDown >= 0) {
@@ -388,10 +403,20 @@
                 Laya.timer.clear(this, this.onTimer);
                 Laya.timer.clear(this, this.onCountDown);
                 this.countDownValue.visible = false;
+                this.onDisableAllButton();
+                Laya.Tween.to(this.letterPlus, { y: 182, scaleX: 1, scaleY: 1 }, 500, Laya.Ease.backOut, Laya.Handler.create(this, this.onHideLetter, [this.letterPlus], true));
                 this.bossLose++;
                 this.loseScore();
                 this.onCheckCondition();
             }
+        }
+        onDisableAllButton() {
+            this.rockBtn.disabled = true;
+            this.scissorBtn.disabled = true;
+            this.paperBtn.disabled = true;
+            this.rockBtn.visible = false;
+            this.scissorBtn.visible = false;
+            this.paperBtn.visible = false;
         }
         loseScore() {
             if (this.bossLose == 1) {
@@ -418,9 +443,6 @@
             this.player.stop();
             this.guessBlur.stop();
             this.guessBlur.visible = false;
-            this.rockBtn.disabled = true;
-            this.scissorBtn.disabled = true;
-            this.paperBtn.disabled = true;
             Laya.timer.once(2000, this, this.gameOver);
         }
         gameOver() {
@@ -481,6 +503,7 @@
         constructor() { }
         static init() {
             var reg = Laya.ClassUtils.regClass;
+            reg("Loading.ts", Loading);
             reg("GameManager.ts", GameManager);
         }
     }
@@ -490,7 +513,7 @@
     GameConfig.screenMode = "horizontal";
     GameConfig.alignV = "middle";
     GameConfig.alignH = "center";
-    GameConfig.startScene = "Main.scene";
+    GameConfig.startScene = "Loading.scene";
     GameConfig.sceneRoot = "";
     GameConfig.debug = false;
     GameConfig.stat = false;

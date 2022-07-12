@@ -40,11 +40,6 @@ export default class GameManager extends Laya.Script {
     /** @prop {name:countDownValue, tips:"countdownvalue", type:Node, default:null}*/
     public countDownValue:  any;
 
-    /** @prop {name:angryHpValue, tips:"angryhpvalue", type:Node, default:null}*/
-    public angryHpValue:  any;
-    /** @prop {name:angryBox, tips:"angrybox", type:Node, default:null}*/
-    public angryBox:  any;
-
     /** @prop {name:scoreText, tips:"scoretext", type:Node, default:null}*/
     public scoreText:  any;
     /** @prop {name:score, tips:"score", type:Node, default:null}*/
@@ -55,9 +50,11 @@ export default class GameManager extends Laya.Script {
     public currentScore:  any;
 
     /** @prop {name:letterPlus, tips:"letterplus", type:Node, default:null}*/
-    public letterPlus:  any;
+    letterPlus:  any;
     /** @prop {name:letterMinus, tips:"letterMinus", type:Node, default:null}*/
-    public letterMinus:  any;
+    letterMinus:  any;
+    /** @prop {name:letterGood, tips:"lettergood", type:Node, default:null}*/
+    letterGood:  any;
 
     private nCountDown: number;
     private numHp:number = 0;
@@ -97,9 +94,6 @@ export default class GameManager extends Laya.Script {
 
         this.countDownValue = null;
 
-        this.angryBox = null;
-        this.angryHpValue = null;
-
         this.scoreText = null;
         this.score = null;
         this.bestScore = null;
@@ -107,39 +101,13 @@ export default class GameManager extends Laya.Script {
 
         this.letterPlus = null;
         this.letterMinus = null;
+        this.letterGood = null;
 
         Laya.SoundManager.setMusicVolume(0.5);
         this.playMusic(this.currentMusic);
-
     }
 
-    onAwake(): void
-    {
-        var resourceArray = [
-            {url:"main/bg.png", type:Laya.Loader.IMAGE},
-            {url:"res/atlas/symbol.atlas", type:Laya.Loader.ATLAS},
-            {url:"main/end_bg.png", type:Laya.Loader.IMAGE},
-            {url:"res/atlas/player.atlas", type:Laya.Loader.ATLAS},
-            {url:"res/atlas/main.atlas", type:Laya.Loader.ATLAS},
-            {url:"res/sound/bg.mp3", type:Laya.Loader.SOUND},
-            {url:"res/sound/bg_intro.mp3", type:Laya.Loader.SOUND},
-            {url:"res/sound/bg_game_over.mp3", type:Laya.Loader.SOUND},
-            {url:"res/sound/bg_lose.mp3", type:Laya.Loader.SOUND},
-            {url:"res/sound/countdown_123.mp3", type:Laya.Loader.SOUND},
-            {url:"res/sound/countdown_start.mp3", type:Laya.Loader.SOUND},
-            {url:"res/sound/press_but.mp3", type:Laya.Loader.SOUND},
-            {url:"res/sound/win.mp3", type:Laya.Loader.SOUND},  
-            {url:"res/sound/lose.mp3", type:Laya.Loader.SOUND}
-        ];
-        Laya.loader.load(resourceArray,Laya.Handler.create(this,this.onLoad));
-    }
-
-    onLoad():void
-    {
-        Laya.timer.once(1000,this, this.startGame);
-    }
-    
-    startGame(): void 
+    onStart(): void
     {
         this.audioBtn.on(Laya.Event.MOUSE_UP, this, this.onAudio);
         this.startBtn.once(Laya.Event.CLICK, this, this.onHideInfo);
@@ -155,8 +123,6 @@ export default class GameManager extends Laya.Script {
 
         this.guessOutput.visible = false;
         this.playerOutput.visible = false;
-
-        this.angryBox.visible = false;
 
         this.scoreText.visible = false;
         this.score.visible = false;
@@ -214,17 +180,13 @@ export default class GameManager extends Laya.Script {
         this.bossLose = 1;
 
         this.numHp = 0;
-        this.angryBox.visible  = true;
-        this.angryHpValue.value = "" + this.numHp;
 
         this.numScore = 0;
         this.scoreText.visible = true;
         this.score.visible = true;
         this.score.value = "000";
 
-        this.rockBtn.visible = false;
-        this.scissorBtn.visible = false;
-        this.paperBtn.visible =false;
+        this.onDisableAllButton();
 
         Laya.timer.once(1000, this, this.onPlay);
     }
@@ -301,18 +263,18 @@ export default class GameManager extends Laya.Script {
             }
             else if(this.bossLose == 2)
             {
-                this.nCountDown = 2.5;
-                this.countDownValue.value = "2.50";  
-            }
-            else if(this.bossLose == 3)
-            {
                 this.nCountDown = 2;
                 this.countDownValue.value = "2.00";  
             }
-            else if(this.bossLose == 4)
+            else if(this.bossLose == 3)
             {
                 this.nCountDown = 1.5;
                 this.countDownValue.value = "1.50";  
+            }
+            else if(this.bossLose == 4)
+            {
+                this.nCountDown = 1;
+                this.countDownValue.value = "1.00";  
             }
         }
 
@@ -328,14 +290,12 @@ export default class GameManager extends Laya.Script {
     onRock():void
     {
         this.playSound('press_but', 0.5);
-        
+
         Laya.timer.clear(this,this.onTimer);
         Laya.timer.clear(this, this.onCountDown);
         this.countDownValue.visible = false;
 
-        this.rockBtn.disabled = true;
-        this.scissorBtn.disabled = true;
-        this.paperBtn.disabled = true;
+        this.onDisableAllButton();
 
         this.player.stop();
         this.playerOutput.visible = true;
@@ -351,8 +311,8 @@ export default class GameManager extends Laya.Script {
             this.updateHp();
 
             this.playerOutput.skin = "main/rock_wrong.png";
-            Laya.Tween.to(this.letterPlus,{y:182,scaleX:1,scaleY:1},500,Laya.Ease.backOut,Laya.Handler.create(this,this.onHideLetterPlus,null,true));
 
+            Laya.Tween.to(this.letterPlus,{y:182,scaleX:1,scaleY:1},500,Laya.Ease.backOut,Laya.Handler.create(this,this.onHideLetter,[this.letterPlus],true));
         }
         else if(this.bossStage == 3)
         {
@@ -377,7 +337,7 @@ export default class GameManager extends Laya.Script {
             this.numHp --;
             this.updateHp();
 
-            Laya.Tween.to(this.letterMinus,{y:182,scaleX:1,scaleY:1},500,Laya.Ease.backOut,Laya.Handler.create(this,this.onHideLetterMinus,null,true));
+            this.onShowLetter();
         }
 
         this.onCheckCondition();
@@ -386,14 +346,12 @@ export default class GameManager extends Laya.Script {
     onScissor():void
     {
         this.playSound('press_but', 0.5);
-        
+
         Laya.timer.clear(this,this.onTimer);
         Laya.timer.clear(this, this.onCountDown);
         this.countDownValue.visible = false;
 
-        this.rockBtn.disabled = true;
-        this.scissorBtn.disabled = true;
-        this.paperBtn.disabled = true;
+        this.onDisableAllButton();
 
         this.player.stop();
         this.playerOutput.visible = true;
@@ -409,7 +367,8 @@ export default class GameManager extends Laya.Script {
             this.updateHp();
 
             this.playerOutput.skin = "main/scissor_wrong.png";
-            Laya.Tween.to(this.letterPlus,{y:182,scaleX:1,scaleY:1},500,Laya.Ease.backOut,Laya.Handler.create(this,this.onHideLetterPlus,null,true));
+
+            Laya.Tween.to(this.letterPlus,{y:182,scaleX:1,scaleY:1},500,Laya.Ease.backOut,Laya.Handler.create(this,this.onHideLetter,[this.letterPlus],true));
         }
         else if(this.bossStage == 1)
         {
@@ -434,8 +393,7 @@ export default class GameManager extends Laya.Script {
             this.numHp --;
             this.updateHp();
 
-            Laya.Tween.to(this.letterMinus,{y:182,scaleX:1,scaleY:1},500,Laya.Ease.backOut,Laya.Handler.create(this,this.onHideLetterMinus,null,true));
-
+            this.onShowLetter();
         }
 
         this.onCheckCondition();
@@ -449,9 +407,7 @@ export default class GameManager extends Laya.Script {
         Laya.timer.clear(this, this.onCountDown);
         this.countDownValue.visible = false;
 
-        this.rockBtn.disabled = true;
-        this.scissorBtn.disabled = true;
-        this.paperBtn.disabled = true;
+        this.onDisableAllButton();
 
         this.player.stop();
         this.playerOutput.visible = true;
@@ -467,9 +423,8 @@ export default class GameManager extends Laya.Script {
             this.updateHp();
 
             this.playerOutput.skin = "main/paper_wrong.png";
-            Laya.Tween.to(this.letterPlus,{y:182,scaleX:1,scaleY:1},500,Laya.Ease.backOut,Laya.Handler.create(this,this.onHideLetterPlus,null,true));
-
-
+            
+            Laya.Tween.to(this.letterPlus,{y:182,scaleX:1,scaleY:1},500,Laya.Ease.backOut,Laya.Handler.create(this,this.onHideLetter,[this.letterPlus],true));
         }
         else if(this.bossStage == 2)
         {
@@ -494,8 +449,7 @@ export default class GameManager extends Laya.Script {
             this.numHp --;
             this.updateHp();
 
-            Laya.Tween.to(this.letterMinus,{y:182,scaleX:1,scaleY:1},500,Laya.Ease.backOut,Laya.Handler.create(this,this.onHideLetterMinus,null,true));
-
+            this.onShowLetter();
         }
 
         this.onCheckCondition();
@@ -514,7 +468,6 @@ export default class GameManager extends Laya.Script {
             
             Laya.timer.clear(this,this.onTimer);
             Laya.timer.clear(this, this.onCountDown);
-
             this.onFreeze();
         }
     }
@@ -571,8 +524,18 @@ export default class GameManager extends Laya.Script {
         {
             this.numHp = 4;
         }
+    }
 
-        this.angryHpValue.value = "" + this.numHp;
+    onShowLetter(): void
+    {
+        if(this.bossLose == 1)
+        {
+            Laya.Tween.to(this.letterGood,{y:182,scaleX:1,scaleY:1},500,Laya.Ease.backOut,Laya.Handler.create(this,this.onHideLetter,[this.letterGood],true));
+        }
+        else
+        {
+            Laya.Tween.to(this.letterMinus,{y:182,scaleX:1,scaleY:1},500,Laya.Ease.backOut,Laya.Handler.create(this,this.onHideLetter,[this.letterMinus],true));
+        }
     }
 
     onHide(): void
@@ -580,14 +543,10 @@ export default class GameManager extends Laya.Script {
         this.playerOutput.visible = false;
     }
 
-    onHideLetterPlus(): void
+    onHideLetter(iLetter:Laya.Text): void
     {
-        Laya.Tween.to(this.letterPlus,{alpha:0},200,Laya.Ease.bounceIn,Laya.Handler.create(this,this.onHideLetterComplete,null,true));
-    }
-
-    onHideLetterMinus(): void
-    {
-        Laya.Tween.to(this.letterMinus,{alpha:0},200,Laya.Ease.bounceIn,Laya.Handler.create(this,this.onHideLetterComplete,null,true));
+        console.log(iLetter);
+        Laya.Tween.to(iLetter,{alpha:0},200,Laya.Ease.bounceIn,Laya.Handler.create(this,this.onHideLetterComplete,null,true));
     }
 
     onHideLetterComplete(): void
@@ -599,6 +558,10 @@ export default class GameManager extends Laya.Script {
         this.letterPlus.scale(0,0);
         this.letterPlus.pos(97,281);
         this.letterPlus.alpha = 1;
+
+        this.letterGood.scale(0,0);
+        this.letterGood.pos(96,282);
+        this.letterGood.alpha = 1;
     }
 
     onCountDown(iValue:number): void 
@@ -614,12 +577,28 @@ export default class GameManager extends Laya.Script {
         {  
             Laya.timer.clear(this,this.onTimer);
             Laya.timer.clear(this, this.onCountDown);
+
             this.countDownValue.visible = false;
+
+            this.onDisableAllButton();
+
+            Laya.Tween.to(this.letterPlus,{y:182,scaleX:1,scaleY:1},500,Laya.Ease.backOut,Laya.Handler.create(this,this.onHideLetter,[this.letterPlus],true));
 
             this.bossLose ++;
             this.loseScore();
             this.onCheckCondition();
         }
+    }
+
+    onDisableAllButton(): void
+    { 
+        this.rockBtn.disabled = true;
+        this.scissorBtn.disabled = true;
+        this.paperBtn.disabled = true;
+
+        this.rockBtn.visible = false;
+        this.scissorBtn.visible = false;
+        this.paperBtn.visible = false;
     }
 
     loseScore(): void
@@ -659,10 +638,6 @@ export default class GameManager extends Laya.Script {
         this.player.stop();
         this.guessBlur.stop();
         this.guessBlur.visible = false;
-        
-        this.rockBtn.disabled = true;
-        this.scissorBtn.disabled = true;
-        this.paperBtn.disabled = true;
 
         Laya.timer.once(2000, this, this.gameOver);
     }
@@ -727,7 +702,6 @@ export default class GameManager extends Laya.Script {
         }
 
         Laya.SoundManager.soundMuted = !this.audioStatus;
-
     }
 
     playMusic(soundName: string) : void
@@ -739,7 +713,8 @@ export default class GameManager extends Laya.Script {
         }
     }
 
-    playSound(soundName:string, soundVolume:number):void{
+    playSound(soundName:string, soundVolume:number):void
+    {
         Laya.SoundManager.setSoundVolume(soundVolume);
         Laya.SoundManager.playSound("res/sound/"+soundName+".mp3", 1);
     }

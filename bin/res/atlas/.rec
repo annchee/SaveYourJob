@@ -40,6 +40,7 @@ P 5FD17798 vscroll.png
 P DDDDFB9E vslider$bar.png
 P 01BAE7F5 vslider.png
 D main
+P 940B9CF5 bar.png
 R 315BC9E1 bg.png
 P 5D8E162D blink_box.png
 P C75026C6 blur_em_paper.png
@@ -75,7 +76,6 @@ P 8AC91656 scissor.png
 P 8E928A81 scissor_correct.png
 P A70BA14E scissor_wrong.png
 P 5D6A947F Score.png
-P BE39FCDA scoretitle.png
 P ACC8CB03 sub_btn.png
 P C8CB7FD1 symbol_1.png
 P DE742334 symbol_1_blur.png
@@ -85,7 +85,6 @@ P ED5367E6 symbol_3.png
 P F44ED3BB symbol_3_blur.png
 R EAF13296 talkBg.png
 P 5099AA06 teachbg.png
-R CF591BC4 warningbg.png
 D player
 P 403F381B player_1.png
 P FEE8688A player_2.png

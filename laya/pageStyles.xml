@@ -1,3 +1,4 @@
 <page>
    <item name="Main.scene" props="" ifExport="Default" aName=""/>
+   <item name="Loading.scene" props="" ifExport="Default" aName=""/>
 </page>
